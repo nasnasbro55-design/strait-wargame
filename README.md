@@ -9,7 +9,7 @@ A turn-based wargame that puts you in the seat of the US commander during a Chin
 | Layer | Technology |
 |---|---|
 | Frontend | React, TailwindCSS |
-| AI Agents | Claude API (Anthropic) |
+| AI Agents | Groq llama 3.3 |
 | Database | Supabase (Postgres) |
 | Backend | Python / Flask |
 
