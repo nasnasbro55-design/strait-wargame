@@ -1,12 +1,19 @@
-import anthropic
+from groq import Groq
 import json
 import os
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 ADJUDICATOR_SYSTEM_PROMPT = """You are a geopolitical adjudicator analyzing a Taiwan Strait crisis wargame simulation.
-Assess the current state of the crisis after each turn and return a structured JSON score.
-Always return ONLY valid JSON, no preamble:
+
+Your job is to assess the current state of the crisis after each turn and return a structured JSON score.
+
+You must consider:
+- The cumulative history of decisions and escalations
+- Real-world geopolitical dynamics between the US, China, Taiwan, Japan, and international actors
+- Military, economic, diplomatic, and cyber dimensions of the conflict
+
+Always return ONLY valid JSON in this exact format, no preamble:
 {
   "escalation_level": <integer 0-100>,
   "escalation_label": "<Low | Moderate | High | Critical | War>",
@@ -15,7 +22,7 @@ Always return ONLY valid JSON, no preamble:
   "china_casualties": <integer>,
   "international_reaction": "<1-2 sentence description>",
   "conflict_probability": <float 0.0-1.0>,
-  "narrative_summary": "<2-3 sentence summary of where the crisis stands>"
+  "narrative_summary": "<2-3 sentence summary>"
 }"""
 
 def get_adjudicator_score(player_decision, redcell_response, turn_history):
@@ -23,16 +30,26 @@ def get_adjudicator_score(player_decision, redcell_response, turn_history):
     for i, turn in enumerate(turn_history):
         history_text += f"\nTurn {i+1}: US decided to {turn['player_decision']['label']}. China responded: {turn['redcell_response']['narrative']}"
 
-    user_message = f"""Crisis history:{history_text}
-Current turn:
-- US decision: {player_decision['label']}
-- China response: {redcell_response['narrative']}
-Return adjudicator score as JSON."""
+    user_message = f"""Crisis history so far:{history_text}
 
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+Current turn:
+- US Commander decision: {player_decision['label']}
+- China (Red Cell) response: {redcell_response['narrative']}
+
+Assess the current state of the Taiwan Strait crisis and return your adjudicator score as JSON."""
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
         max_tokens=1000,
-        system=ADJUDICATOR_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}]
+        messages=[
+            {"role": "system", "content": ADJUDICATOR_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
     )
-    return json.loads(message.content[0].text.strip())
+
+    raw = response.choices[0].message.content.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return json.loads(raw.strip())
