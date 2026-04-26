@@ -1,12 +1,16 @@
 from groq import Groq
 import json
 import os
+from dotenv import load_dotenv
 
-from dotenv import load_dotenv; load_dotenv(); client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+load_dotenv()
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 ADJUDICATOR_SYSTEM_PROMPT = """You are a geopolitical adjudicator analyzing a Taiwan Strait crisis wargame simulation.
 
 Your job is to assess the current state of the crisis after each turn and return a structured JSON score.
+
+IMPORTANT: Casualties must be REALISTIC. When escalation is above 60, taiwan_casualties should be in the hundreds. Above 80, in the thousands. Naval clashes cause us_casualties of 10-50. Never return 0 casualties when escalation is above 50 and military actions have been taken.
 
 Always return ONLY valid JSON in this exact format, no preamble, no markdown, no code fences:
 {"escalation_level": <integer 0-100>, "escalation_label": "<Low|Moderate|High|Critical|War>", "us_casualties": <integer>, "taiwan_casualties": <integer>, "china_casualties": <integer>, "international_reaction": "<1-2 sentence description>", "conflict_probability": <float 0.0-1.0>, "narrative_summary": "<2-3 sentence summary>"}"""
@@ -32,14 +36,13 @@ Return adjudicator score as JSON only. No markdown. No code fences. Just the JSO
             {"role": "user", "content": user_message}
         ]
     )
-
     raw = response.choices[0].message.content.strip()
-
-    raw = raw.replace("```json", "").replace("```", "").strip()
-
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
     start = raw.find('{')
     end = raw.rfind('}')
     if start != -1 and end != -1:
         raw = raw[start:end+1]
-
-    return json.loads(raw)
+    return json.loads(raw.strip())

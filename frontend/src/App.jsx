@@ -9,12 +9,18 @@ import AdjudicatorBar from './components/AdjudicatorBar'
 import AfterActionReview from './components/AfterActionReview'
 
 const DECISIONS = [
-  { action: 'deploy_carrier', category: 'MILITARY', label: 'Deploy carrier strike group to South China Sea' },
+  { action: 'deploy_carrier', category: 'MILITARY', label: 'Deploy USS Reagan CSG to South China Sea' },
+  { action: 'defcon3', category: 'MILITARY', label: 'Raise US Forces to DEFCON 3 — elevated readiness' },
+  { action: 'fonop', category: 'MILITARY', label: 'Conduct Freedom of Navigation Operation through Strait' },
   { action: 'backchannel', category: 'DIPLOMATIC', label: 'Open backchannel via Swiss embassy in Beijing' },
-  { action: 'sanctions', category: 'ECONOMIC', label: 'Impose coordinated G7 financial sanctions' },
-  { action: 'cyber_ops', category: 'CYBER', label: 'Activate USCYBERCOM offensive posture' },
-  { action: 'ceasefire', category: 'DEESCALATION', label: 'Issue public call for ceasefire negotiations' },
-  { action: 'airlift', category: 'LOGISTICS', label: 'Airlift defensive supplies to Taiwan' },
+  { action: 'un_address', category: 'DIPLOMATIC', label: 'Address UN Security Council — demand ceasefire' },
+  { action: 'taiwan_recognize', category: 'DIPLOMATIC', label: 'Issue formal statement affirming Taiwan Relations Act' },
+  { action: 'sanctions', category: 'ECONOMIC', label: 'Impose coordinated G7 financial sanctions on China' },
+  { action: 'trade_block', category: 'ECONOMIC', label: 'Block Chinese access to SWIFT banking system' },
+  { action: 'cyber_ops', category: 'CYBER', label: 'Activate USCYBERCOM offensive posture against PLA networks' },
+  { action: 'intel_share', category: 'INTELLIGENCE', label: 'Share real-time ISR data with Taiwan and Japan' },
+  { action: 'stand_down', category: 'DEESCALATION', label: 'Order partial stand-down — pull CSG back 200nm' },
+  { action: 'ceasefire', category: 'DEESCALATION', label: 'Propose mutual ceasefire with PRC via UN mediator' },
 ]
 
 const MAX_TURNS = 10
