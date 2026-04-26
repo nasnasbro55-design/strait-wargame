@@ -8,6 +8,13 @@ const DOCTRINE_MAP = {
   cyber_ops: 'Offensive cyber operations below the threshold of armed conflict. Doctrine: maintain plausible deniability.',
   ceasefire: 'De-escalation initiatives require credible commitment from both sides. Doctrine: pair calls for ceasefire with tangible concessions.',
   airlift: 'Defensive resupply strengthens deterrence without direct confrontation. Doctrine: bolster partner capacity before conflict.',
+  fonop: 'Freedom of Navigation Operations assert international law and signal US commitment to open seas. Doctrine: conduct regularly to normalize presence without escalation.',
+  un_address: 'Multilateral diplomacy through the UN builds coalition support but risks deadlock. Doctrine: use Security Council to isolate China diplomatically.',
+  taiwan_recognize: 'Affirming the Taiwan Relations Act signals commitment without formal recognition. Doctrine: maintain strategic ambiguity while deterring aggression.',
+  trade_block: 'SWIFT exclusion is a maximum pressure economic tool. Doctrine: reserve for critical escalation thresholds — difficult to reverse.',
+  intel_share: 'Intelligence sharing strengthens partner capacity and builds coalition trust. Doctrine: expand ISR partnerships before conflict to enable rapid response.',
+  defcon3: 'DEFCON 3 raises readiness and signals resolve but increases miscalculation risk. Doctrine: accompany with direct communication to adversary to prevent misinterpretation.',
+  stand_down: 'Ordered stand-down signals restraint and creates space for diplomacy. Doctrine: pair de-escalatory military moves with diplomatic outreach.',
 }
 
 const OUTCOME_COLOR = (escalation) => {
