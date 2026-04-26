@@ -46,7 +46,10 @@ export default function RedCellPanel({ lastRedCell, turnHistory }) {
       </div>
 
       <div style={{ fontSize: 8, color: '#444', letterSpacing: 1 }}>LAST MOVE</div>
-      <div style={{
+      <div 
+      key={lastRedCell?.narrative}
+      className="panel-update"
+      style={{
         fontSize: 9,
         color: '#d4dde8',
         lineHeight: 1.6,

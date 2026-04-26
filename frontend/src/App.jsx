@@ -7,6 +7,7 @@ import StraitMap from './components/StraitMap'
 import RedCellPanel from './components/RedCellPanel'
 import AdjudicatorBar from './components/AdjudicatorBar'
 import AfterActionReview from './components/AfterActionReview'
+import EscalationEffects from './components/EscalationEffects'
 
 const DECISIONS = [
   { action: 'deploy_carrier', category: 'MILITARY', label: 'Deploy USS Reagan CSG to South China Sea' },
@@ -147,6 +148,7 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      <EscalationEffects escalationLevel={gameState.escalationLevel} />
     </div>
   )
 }

@@ -34,9 +34,18 @@ export default function TopBar({ turn, status, escalationLevel }) {
         <span style={{ fontSize: 10, color: esc.color, letterSpacing: 1, fontFamily: 'IBM Plex Mono' }}>
           ESC: {esc.label} [{escalationLevel}/100]
         </span>
-        <span style={{ fontSize: 10, color: '#8b2020', letterSpacing: 1, fontFamily: 'IBM Plex Mono' }}>
-          ● {status === 'loading' ? 'PROCESSING...' : 'SIMULATION ACTIVE'}
-        </span>
+        <span style={{ fontSize: 10, letterSpacing: 1, fontFamily: 'IBM Plex Mono' }}>
+          <span style={{
+            display: 'inline-block',
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#8b2020',
+            marginRight: 6,
+            animation: 'blink 1.2s ease-in-out infinite',
+          }}/>
+          {status === 'loading' ? 'PROCESSING...' : 'SIMULATION ACTIVE'}
+        </span>      
       </div>
     </div>
   )

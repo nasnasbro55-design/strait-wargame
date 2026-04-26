@@ -84,16 +84,19 @@ export default function AdjudicatorBar({ lastAdjudicator, escalationLevel, curre
 
       <div style={{ background: '#0d1117', border: '0.5px solid #1e2a3a', borderRadius: 4, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div style={{ fontSize: 8, letterSpacing: 2, color: '#4a90d9' }}>ADJUDICATOR — STRATEGIC ASSESSMENT</div>
-        <div style={{
-          fontSize: 10,
-          color: '#d4dde8',
-          lineHeight: 1.8,
-          borderLeft: '2px solid #c8a84b',
-          padding: '8px 12px',
-          background: '#0d1117',
-          borderRadius: '0 3px 3px 0',
-          fontFamily: 'Inter, sans-serif',
-          flex: 1,
+        <div 
+          key={lastAdjudicator?.narrative_summary}
+          className="panel-update"
+          style={{
+            fontSize: 10,
+            color: '#d4dde8',
+            lineHeight: 1.8,
+            borderLeft: '2px solid #c8a84b',
+            padding: '8px 12px',
+            background: '#0d1117',
+            borderRadius: '0 3px 3px 0',
+            fontFamily: 'Inter, sans-serif',
+            flex: 1,
         }}>
           {lastAdjudicator
             ? lastAdjudicator.narrative_summary
