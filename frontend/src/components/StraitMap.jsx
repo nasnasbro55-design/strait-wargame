@@ -1,260 +1,134 @@
-import { useRef, useMemo, useEffect } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Text } from '@react-three/drei'
-import * as THREE from 'three'
+import { useEffect, useState } from 'react'
 
-function Ocean() {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
-      <planeGeometry args={[24, 16]} />
-      <meshStandardMaterial color="#050d1a" roughness={1} />
-    </mesh>
-  )
-}
+const W = 800
+const H = 500
 
-function Grid() {
-  const lines = useMemo(() => {
-    const l = []
-    for (let x = -10; x <= 10; x += 2.5) {
-      l.push([new THREE.Vector3(x, 0.01, -8), new THREE.Vector3(x, 0.01, 8)])
-    }
-    for (let z = -8; z <= 8; z += 2.5) {
-      l.push([new THREE.Vector3(-10, 0.01, z), new THREE.Vector3(10, 0.01, z)])
-    }
-    return l
-  }, [])
-  return (
-    <>
-      {lines.map((pts, i) => (
-        <line key={i} geometry={new THREE.BufferGeometry().setFromPoints(pts)}>
-          <lineBasicMaterial color="#1a2a3a" opacity={0.5} transparent />
-        </line>
-      ))}
-    </>
-  )
-}
-
-function China() {
-  return (
-    <group position={[-7.5, 0, 0]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[9, 16]} />
-        <meshStandardMaterial color="#0c1a0c" roughness={1} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[3, 0.05, 0]}>
-        <planeGeometry args={[3, 16]} />
-        <meshStandardMaterial color="#0e1e0e" roughness={1} />
-      </mesh>
-      <Text position={[-1, 0.1, -1]} rotation={[-Math.PI/2,0,0]} fontSize={0.7} color="#1e3a1e" anchorX="center" anchorY="middle" letterSpacing={0.2}>CHINA</Text>
-      <Text position={[-1, 0.1, 0.8]} rotation={[-Math.PI/2,0,0]} fontSize={0.28} color="#162616" anchorX="center" anchorY="middle" letterSpacing={0.1}>FUJIAN PROVINCE</Text>
-    </group>
-  )
-}
-
-function Taiwan() {
-  const shape = useMemo(() => {
-    const s = new THREE.Shape()
-    s.moveTo(0, -1.3)
-    s.bezierCurveTo(0.4, -1.0, 0.55, -0.4, 0.5, 0.2)
-    s.bezierCurveTo(0.45, 0.7, 0.2, 1.1, 0, 1.3)
-    s.bezierCurveTo(-0.2, 1.1, -0.4, 0.7, -0.38, 0.2)
-    s.bezierCurveTo(-0.38, -0.4, -0.2, -1.0, 0, -1.3)
-    return s
-  }, [])
-
-  return (
-    <group position={[0.8, 0, 0.2]}>
-      <mesh rotation={[-Math.PI/2, 0, 0.15]}>
-        <extrudeGeometry args={[shape, { depth: 0.3, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05 }]} />
-        <meshStandardMaterial color="#1e3a1e" roughness={0.6} emissive="#0a1a0a" emissiveIntensity={0.3} />
-      </mesh>
-      <Text position={[0, 0.55, -0.2]} rotation={[-Math.PI/2,0,0]} fontSize={0.32} color="#4a8a4a" anchorX="center" anchorY="middle" letterSpacing={0.1}>TAIWAN</Text>
-    </group>
-  )
-}
-
-function MedianLine() {
-  const pts = []
-  for (let i = 0; i <= 20; i++) pts.push(new THREE.Vector3(-0.5, 0.05, -7.5 + i * 0.75))
-  const geo = new THREE.BufferGeometry().setFromPoints(pts)
-  return (
-    <group>
-      <line geometry={geo}>
-        <lineBasicMaterial color="#c8a84b" opacity={0.6} transparent />
-      </line>
-      <Text position={[-0.5, 0.08, -5]} rotation={[-Math.PI/2,0,0]} fontSize={0.2} color="#c8a84b" anchorX="center" fillOpacity={0.7}>MEDIAN LINE</Text>
-    </group>
-  )
-}
-
-function USUnit({ position, label }) {
-  const ref = useRef()
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.y = Math.sin(clock.getElapsedTime() * 0.8 + position[0]) * 0.05 + 0.25
-  })
-  return (
-    <group position={position}>
-      <mesh ref={ref} position={[0, 0.25, 0]}>
-        <sphereGeometry args={[0.18, 24, 24]} />
-        <meshStandardMaterial color="#4a90d9" emissive="#4a90d9" emissiveIntensity={0.8} />
-      </mesh>
-      <mesh rotation={[-Math.PI/2,0,0]} position={[0, 0.02, 0]}>
-        <ringGeometry args={[0.28, 0.33, 48]} />
-        <meshBasicMaterial color="#4a90d9" opacity={0.35} transparent side={THREE.DoubleSide} />
-      </mesh>
-      <mesh rotation={[-Math.PI/2,0,0]} position={[0, 0.02, 0]}>
-        <ringGeometry args={[0.55, 0.58, 48]} />
-        <meshBasicMaterial color="#4a90d9" opacity={0.15} transparent side={THREE.DoubleSide} />
-      </mesh>
-      <Text position={[0.3, 0.3, 0]} rotation={[-Math.PI/2,0,0]} fontSize={0.22} color="#4a90d9" anchorX="left">{label}</Text>
-    </group>
-  )
-}
-
-function PLAUnit({ position, label, confirmed }) {
-  const ref = useRef()
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.position.y = Math.sin(clock.getElapsedTime() * 0.6 + position[2]) * 0.04 + 0.2
-  })
-  if (!confirmed) {
-    return (
-      <group position={position}>
-        <mesh rotation={[Math.PI/4, Math.PI/4, 0]}>
-          <boxGeometry args={[0.22, 0.22, 0.22]} />
-          <meshStandardMaterial color="#8b2020" opacity={0.55} transparent wireframe />
-        </mesh>
-        <Text position={[0.25, 0.3, 0]} rotation={[-Math.PI/2,0,0]} fontSize={0.18} color="#8b202088" anchorX="left">{label} ?</Text>
-      </group>
-    )
-  }
-  return (
-    <group position={position}>
-      <mesh ref={ref} position={[0, 0.2, 0]}>
-        <sphereGeometry args={[0.15, 24, 24]} />
-        <meshStandardMaterial color="#8b2020" emissive="#8b2020" emissiveIntensity={0.7} />
-      </mesh>
-      <Text position={[0.25, 0.25, 0]} rotation={[-Math.PI/2,0,0]} fontSize={0.18} color="#8b2020" anchorX="left">{label}</Text>
-    </group>
-  )
-}
-
-function FogOfWar() {
-  const ref = useRef()
-  const count = 300
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 7 - 4.5
-      pos[i * 3 + 1] = Math.random() * 0.6 + 0.1
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 14
-    }
-    return pos
-  }, [])
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.material.opacity = 0.07 + Math.sin(clock.getElapsedTime() * 0.3) * 0.03
-  })
-  return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
-      </bufferGeometry>
-      <pointsMaterial color="#8b2020" size={0.08} opacity={0.07} transparent sizeAttenuation />
-    </points>
-  )
-}
-
-function MissileArc({ active }) {
-  const ref = useRef()
-  const pts = useMemo(() => {
-    const p = []
-    for (let i = 0; i <= 40; i++) {
-      const t = i / 40
-      p.push(new THREE.Vector3(-1.5 + t * 5.5, Math.sin(t * Math.PI) * 2, -0.5 + t * 1.5))
-    }
-    return p
-  }, [])
-  const geo = useMemo(() => new THREE.BufferGeometry().setFromPoints(pts), [pts])
-  useFrame(({ clock }) => {
-    if (ref.current) ref.current.material.opacity = active ? 0.5 + Math.sin(clock.getElapsedTime() * 4) * 0.25 : 0
-  })
-  return (
-    <line ref={ref} geometry={geo}>
-      <lineBasicMaterial color="#ff2020" opacity={0} transparent />
-    </line>
-  )
-}
-
-function RegionLabel({ position, text, color, size }) {
-  return (
-    <Text position={position} rotation={[-Math.PI/2,0,0]} fontSize={size} color={color} anchorX="center" fillOpacity={0.35} letterSpacing={0.15}>
-      {text}
-    </Text>
-  )
-}
-
-function Scene({ turnHistory, escalationLevel }) {
-  const { camera } = useThree()
-  useEffect(() => {
-    camera.position.set(1, 7, 9)
-    camera.lookAt(0, 0, 0)
-  }, [camera])
-
-  return (
-    <>
-      <ambientLight intensity={0.6} />
-      <pointLight position={[5, 8, 5]} intensity={1.0} color="#5a9ae9" />
-      <pointLight position={[-5, 5, -3]} intensity={0.6} color="#9b3030" />
-      <directionalLight position={[2, 10, 4]} intensity={0.5} color="#ffffff" />
-
-      <Ocean />
-      <Grid />
-      <China />
-      <Taiwan />
-      <MedianLine />
-      <FogOfWar />
-
-      <RegionLabel position={[4.5, 0.05, 1]} text="SOUTH CHINA SEA" color="#4a90d9" size={0.35} />
-      <RegionLabel position={[-0.2, 0.05, 3.5]} text="TAIWAN STRAIT" color="#4a90d9" size={0.25} />
-      <RegionLabel position={[4.5, 0.05, -5]} text="PHILIPPINE SEA" color="#4a90d9" size={0.25} />
-
-      <USUnit position={[3.8, 0, -2]} label="CSG-5" />
-      <USUnit position={[4.5, 0, 0.8]} label="DDG-51" />
-      <USUnit position={[3.2, 0, 3.2]} label="SSN" />
-
-      <PLAUnit position={[-0.3, 0, -2.5]} label="PLAN SURFACE" confirmed={true} />
-      <PLAUnit position={[-0.6, 0, 0.5]} label="PLAN SURFACE" confirmed={true} />
-      <PLAUnit position={[-0.4, 0, 3]} label="PLAN SURFACE" confirmed={true} />
-      <PLAUnit position={[-3, 0, -2]} label="PLAN UNIT" confirmed={false} />
-      <PLAUnit position={[-3.2, 0, 1]} label="PLAN UNIT" confirmed={false} />
-      <PLAUnit position={[-2.8, 0, 3.5]} label="PLAN UNIT" confirmed={false} />
-
-      <MissileArc active={turnHistory.length > 0 && escalationLevel > 40} />
-
-      <OrbitControls enablePan={false} minPolarAngle={Math.PI/5} maxPolarAngle={Math.PI/2.3} minDistance={5} maxDistance={16} target={[0, 0, 0]} />
-    </>
-  )
-}
+const FUJIAN_PATH = "M 0,0 L 0,500 L 145,500 L 150,478 L 144,455 L 149,432 L 143,410 L 148,388 L 145,362 L 152,338 L 147,315 L 155,292 L 149,268 L 157,245 L 152,222 L 159,198 L 154,175 L 161,152 L 156,128 L 163,105 L 158,82 L 165,58 L 160,35 L 167,12 L 165,0 Z"
+const TAIWAN_PATH = "M 310,108 C 322,108 338,122 345,138 C 352,156 353,178 351,200 C 348,224 341,248 333,266 C 324,284 313,296 304,300 C 295,296 284,284 276,266 C 268,248 262,224 260,200 C 258,178 260,156 267,138 C 274,122 298,108 310,108 Z"
 
 export default function StraitMap({ turnHistory, escalationLevel }) {
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 50)
+    return () => clearInterval(interval)
+  }, [])
+
+  const fogOpacity = 0.15 + Math.sin(tick * 0.04) * 0.05
+  const radarPulse1 = (tick % 80) / 80
+  const radarPulse2 = ((tick + 40) % 80) / 80
+  const showMissile = turnHistory.length > 0 && escalationLevel > 40
+  const mp = showMissile ? (tick % 100) / 100 : 0
+  const mx = 155 + mp * (490 - 155)
+  const my = 220 + Math.sin(mp * Math.PI) * -100
+  const u1y = 165 + Math.sin(tick * 0.05) * 5
+  const u2y = 265 + Math.sin(tick * 0.05 + 1) * 5
+  const u3y = 355 + Math.sin(tick * 0.05 + 2) * 5
+  const p1y = 200 + Math.sin(tick * 0.04) * 4
+  const p2y = 300 + Math.sin(tick * 0.04 + 1) * 4
+  const p3y = 390 + Math.sin(tick * 0.04 + 2) * 4
+
   return (
-    <div style={{ flex:1, background:'#060810', border:'0.5px solid #1e2a3a', borderRadius:4, display:'flex', flexDirection:'column', overflow:'hidden', position:'relative' }}>
-      <div style={{ padding:'7px 12px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'0.5px solid #1e2a3a', flexShrink:0, fontFamily:'IBM Plex Mono', zIndex:10 }}>
+    <div style={{ flex:1, background:'#040810', border:'0.5px solid #1e2a3a', borderRadius:4, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+      <div style={{ padding:'7px 12px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'0.5px solid #1e2a3a', flexShrink:0, fontFamily:'IBM Plex Mono' }}>
         <span style={{ fontSize:9, letterSpacing:2, color:'#4a90d9' }}>TAIWAN STRAIT — OPERATIONAL THEATER</span>
-        <span style={{ fontSize:9, color:'#c8a84b', letterSpacing:1 }}>ESC LEVEL: {escalationLevel}/100</span>
+        <span style={{ fontSize:9, color: escalationLevel >= 65 ? '#8b2020' : '#c8a84b', letterSpacing:1 }}>ESC LEVEL: {escalationLevel}/100</span>
       </div>
-      <div style={{ flex:1, position:'relative' }}>
-        <Canvas gl={{ antialias:true, alpha:false }} style={{ background:'#040810' }}>
-          <Scene turnHistory={turnHistory} escalationLevel={escalationLevel} />
-        </Canvas>
-        <div style={{ position:'absolute', bottom:8, left:12, display:'flex', gap:16, fontFamily:'IBM Plex Mono', fontSize:8, zIndex:10, background:'#0a0c10cc', padding:'4px 10px', borderRadius:3 }}>
-          <span style={{ color:'#4a90d9' }}>● US NAVY</span>
-          <span style={{ color:'#8b2020' }}>● PLA CONFIRMED</span>
-          <span style={{ color:'#8b202066' }}>□ PLA UNKNOWN</span>
-          <span style={{ color:'#c8a84b' }}>-- MEDIAN LINE</span>
-        </div>
-        <div style={{ position:'absolute', top:8, right:12, fontFamily:'IBM Plex Mono', fontSize:7, color:'#2a3a4a', zIndex:10 }}>
-          DRAG TO ROTATE / SCROLL TO ZOOM
-        </div>
+      <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'100%', display:'block' }} preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#040d1a"/>
+              <stop offset="25%" stopColor="#061525"/>
+              <stop offset="60%" stopColor="#081d35"/>
+              <stop offset="100%" stopColor="#061228"/>
+            </linearGradient>
+            <radialGradient id="fogGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#8b2020" stopOpacity="0.3"/>
+              <stop offset="100%" stopColor="#8b2020" stopOpacity="0"/>
+            </radialGradient>
+            <radialGradient id="usGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#4a90d9" stopOpacity="0.12"/>
+              <stop offset="100%" stopColor="#4a90d9" stopOpacity="0"/>
+            </radialGradient>
+            <filter id="gb" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="gr" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <rect width={W} height={H} fill="url(#oceanGrad)"/>
+          {[...Array(11)].map((_, i) => <line key={`h${i}`} x1="0" y1={i*50} x2={W} y2={i*50} stroke="#132030" strokeWidth="0.5"/>)}
+          {[...Array(17)].map((_, i) => <line key={`v${i}`} x1={i*50} y1="0" x2={i*50} y2={H} stroke="#132030" strokeWidth="0.5"/>)}
+
+          <path d={FUJIAN_PATH} fill="#0c180c"/>
+          <path d={FUJIAN_PATH} fill="none" stroke="#1e3a1e" strokeWidth="1.5"/>
+          <path d={FUJIAN_PATH} fill="none" stroke="#2a5a2a" strokeWidth="0.5" opacity="0.5"/>
+
+          <ellipse cx="75" cy="250" rx="90" ry="160" fill="url(#fogGrad)" opacity={fogOpacity * 2.5}/>
+          <ellipse cx="100" cy="380" rx="70" ry="80" fill="url(#fogGrad)" opacity={fogOpacity * 1.5}/>
+          <ellipse cx="80" cy="120" rx="60" ry="90" fill="url(#fogGrad)" opacity={fogOpacity}/>
+
+          <path d={TAIWAN_PATH} fill="#112211"/>
+          <path d={TAIWAN_PATH} fill="none" stroke="#2a5a2a" strokeWidth="1.5"/>
+          <path d={TAIWAN_PATH} fill="none" stroke="#4a8a4a" strokeWidth="0.5" opacity="0.6"/>
+
+          <text x="72" y="252" fontSize="13" fill="#1e3a1e" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="5" opacity="0.7">CHINA</text>
+          <text x="72" y="270" fontSize="8" fill="#152815" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="2" opacity="0.6">FUJIAN PROVINCE</text>
+          <text x="305" y="208" fontSize="9" fill="#3a7a3a" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="1" opacity="0.9">TAIWAN</text>
+          <text x="230" y="60" fontSize="8" fill="#0d2a40" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="2" opacity="0.8">TAIWAN STRAIT</text>
+          <text x="580" y="420" fontSize="10" fill="#0a1e38" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="3" opacity="0.7">SOUTH CHINA SEA</text>
+          <text x="650" y="80" fontSize="9" fill="#0a1e38" textAnchor="middle" fontFamily="IBM Plex Mono" letterSpacing="2" opacity="0.6">PHILIPPINE SEA</text>
+
+          <line x1="245" y1="0" x2="245" y2={H} stroke="#c8a84b" strokeWidth="1" strokeDasharray="7,5" opacity="0.5"/>
+          <text x="248" y="18" fontSize="8" fill="#c8a84b" fontFamily="IBM Plex Mono" opacity="0.65" letterSpacing="1">MEDIAN LINE</text>
+
+          <circle cx="490" cy={u1y} r={20 + radarPulse1 * 50} fill="none" stroke="#4a90d9" strokeWidth="0.8" opacity={0.3 * (1 - radarPulse1)}/>
+          <circle cx="490" cy={u1y} r={20 + radarPulse2 * 50} fill="none" stroke="#4a90d9" strokeWidth="0.8" opacity={0.3 * (1 - radarPulse2)}/>
+
+          <circle cx="178" cy={p1y} r="7" fill="#8b2020" filter="url(#gr)"/>
+          <text x="190" y={p1y+4} fontSize="8" fill="#cc3030" fontFamily="IBM Plex Mono">PLAN SURFACE</text>
+          <circle cx="170" cy={p2y} r="7" fill="#8b2020" filter="url(#gr)"/>
+          <text x="182" y={p2y+4} fontSize="8" fill="#cc3030" fontFamily="IBM Plex Mono">PLAN SURFACE</text>
+          <circle cx="175" cy={p3y} r="6" fill="#8b2020" filter="url(#gr)"/>
+          <text x="186" y={p3y+4} fontSize="8" fill="#cc3030" fontFamily="IBM Plex Mono">PLAN SURFACE</text>
+
+          <rect x="110" y="138" width="18" height="18" rx="2" fill="#0f0808" stroke="#8b202077" strokeWidth="1"/>
+          <text x="119" y="151" fontSize="11" fill="#8b2020" textAnchor="middle" fontFamily="IBM Plex Mono" opacity="0.8">?</text>
+          <rect x="102" y="325" width="18" height="18" rx="2" fill="#0f0808" stroke="#8b202077" strokeWidth="1"/>
+          <text x="111" y="338" fontSize="11" fill="#8b2020" textAnchor="middle" fontFamily="IBM Plex Mono" opacity="0.8">?</text>
+          <rect x="118" y="428" width="18" height="18" rx="2" fill="#0f0808" stroke="#8b202077" strokeWidth="1"/>
+          <text x="127" y="441" fontSize="11" fill="#8b2020" textAnchor="middle" fontFamily="IBM Plex Mono" opacity="0.8">?</text>
+
+          <circle cx="490" cy={u1y} r="9" fill="#4a90d9" filter="url(#gb)"/>
+          <text x="504" y={u1y+4} fontSize="9" fill="#6ab0f9" fontFamily="IBM Plex Mono">CSG-5</text>
+          <circle cx="520" cy={u2y} r="8" fill="#4a90d9" filter="url(#gb)"/>
+          <text x="533" y={u2y+4} fontSize="9" fill="#6ab0f9" fontFamily="IBM Plex Mono">DDG-51</text>
+          <circle cx="475" cy={u3y} r="7" fill="#4a90d9" filter="url(#gb)"/>
+          <text x="488" y={u3y+4} fontSize="9" fill="#6ab0f9" fontFamily="IBM Plex Mono">SSN</text>
+
+          {showMissile && (
+            <>
+              <path d={`M 178 ${p1y} Q 330 80 490 ${u1y}`} fill="none" stroke="#8b2020" strokeWidth="1" strokeDasharray="5,3" opacity="0.45"/>
+              <circle cx={mx} cy={my} r="4" fill="#ff3030" filter="url(#gr)" opacity="0.95"/>
+            </>
+          )}
+
+          <g transform={`translate(8, ${H-75})`}>
+            <circle cx="8" cy="8" r="6" fill="#4a90d9" filter="url(#gb)"/>
+            <text x="18" y="12" fontSize="8" fill="#6ab0f9" fontFamily="IBM Plex Mono">US NAVY</text>
+            <circle cx="8" cy="26" r="6" fill="#8b2020" filter="url(#gr)"/>
+            <text x="18" y="30" fontSize="8" fill="#cc3030" fontFamily="IBM Plex Mono">PLA CONFIRMED</text>
+            <rect x="2" y="42" width="12" height="12" rx="1" fill="#0f0808" stroke="#8b202077" strokeWidth="1"/>
+            <text x="8" y="52" fontSize="9" fill="#8b2020" textAnchor="middle" fontFamily="IBM Plex Mono">?</text>
+            <text x="18" y="52" fontSize="8" fill="#8b202099" fontFamily="IBM Plex Mono">PLA UNKNOWN</text>
+            <line x1="130" y1="26" x2="155" y2="26" stroke="#c8a84b" strokeWidth="1" strokeDasharray="4,2" opacity="0.7"/>
+            <text x="159" y="30" fontSize="8" fill="#c8a84b" fontFamily="IBM Plex Mono">MEDIAN LINE</text>
+          </g>
+        </svg>
       </div>
     </div>
   )

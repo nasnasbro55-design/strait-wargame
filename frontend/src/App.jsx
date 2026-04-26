@@ -6,6 +6,7 @@ import BlueForcePanel from './components/BlueForcePanel'
 import StraitMap from './components/StraitMap'
 import RedCellPanel from './components/RedCellPanel'
 import AdjudicatorBar from './components/AdjudicatorBar'
+import AfterActionReview from './components/AfterActionReview'
 
 const DECISIONS = [
   { action: 'deploy_carrier', category: 'MILITARY', label: 'Deploy carrier strike group to South China Sea' },
@@ -16,8 +17,11 @@ const DECISIONS = [
   { action: 'airlift', category: 'LOGISTICS', label: 'Airlift defensive supplies to Taiwan' },
 ]
 
+const MAX_TURNS = 10
+
 export default function App() {
   const [started, setStarted] = useState(false)
+  const [showAAR, setShowAAR] = useState(false)
   const [gameState, setGameState] = useState({
     sessionId: null,
     currentTurn: 0,
@@ -56,21 +60,43 @@ export default function App() {
       const turns = data.turns || []
       const latestTurn = turns[turns.length - 1]
       if (!latestTurn) throw new Error('No turn data')
+
+      const newTurn = data.current_turn ?? gameState.currentTurn + 1
+      const newEscalation = latestTurn.adjudicator_score?.escalation_level ?? gameState.escalationLevel
+
       setGameState(prev => ({
         ...prev,
         sessionId,
-        currentTurn: data.current_turn ?? prev.currentTurn + 1,
-        status: 'active',
+        currentTurn: newTurn,
+        status: newTurn >= MAX_TURNS || newEscalation >= 90 ? 'complete' : 'active',
         turnHistory: turns,
         selectedDecision: null,
         lastRedCell: latestTurn.redcell_response,
         lastAdjudicator: latestTurn.adjudicator_score,
-        escalationLevel: latestTurn.adjudicator_score?.escalation_level ?? prev.escalationLevel,
+        escalationLevel: newEscalation,
       }))
+
+      if (newTurn >= MAX_TURNS || newEscalation >= 90) {
+        setTimeout(() => setShowAAR(true), 1500)
+      }
     } catch (err) {
       console.error(err)
       setGameState(prev => ({ ...prev, status: 'error' }))
     }
+  }
+
+  const handleRestart = () => {
+    setShowAAR(false)
+    setGameState({
+      sessionId: null,
+      currentTurn: 0,
+      status: 'waiting',
+      turnHistory: [],
+      selectedDecision: null,
+      lastRedCell: null,
+      lastAdjudicator: null,
+      escalationLevel: 20,
+    })
   }
 
   return (
@@ -80,25 +106,27 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {showAAR && (
+          <AfterActionReview
+            turnHistory={gameState.turnHistory}
+            finalEscalation={gameState.escalationLevel}
+            onRestart={handleRestart}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {started && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 6,
-              padding: 8,
-              boxSizing: 'border-box',
-            }}
+            style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', gap: 6, padding: 8, boxSizing: 'border-box' }}
           >
             <TopBar turn={gameState.currentTurn} status={gameState.status} escalationLevel={gameState.escalationLevel} />
             <div style={{ flex: 1, display: 'flex', gap: 6, minHeight: 0, overflow: 'hidden' }}>
               <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2, duration: 0.6 }} style={{ display: 'flex' }}>
-                <BlueForcePanel decisions={DECISIONS} selectedDecision={gameState.selectedDecision} onSelect={selectDecision} onConfirm={confirmAction} loading={gameState.status === 'loading'} />
+                <BlueForcePanel decisions={DECISIONS} selectedDecision={gameState.selectedDecision} onSelect={selectDecision} onConfirm={confirmAction} loading={gameState.status === 'loading'} disabled={gameState.status === 'complete'} />
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.6 }} style={{ flex: 1, display: 'flex' }}>
                 <StraitMap turnHistory={gameState.turnHistory} escalationLevel={gameState.escalationLevel} lastRedCell={gameState.lastRedCell} />

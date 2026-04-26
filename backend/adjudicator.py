@@ -2,7 +2,7 @@ from groq import Groq
 import json
 import os
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+from dotenv import load_dotenv; load_dotenv(); client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 ADJUDICATOR_SYSTEM_PROMPT = """You are a geopolitical adjudicator analyzing a Taiwan Strait crisis wargame simulation.
 
